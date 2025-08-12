@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { getServerSupabase } from '@/lib/auth-helpers'
 
 type Asignacion = {
@@ -19,7 +20,6 @@ export default async function ProfesorHome() {
 
   if (perfil?.rol !== 'profesor') return <p>Acceso restringido</p>
 
-  // OJO: usamos alias "curso:cursos(nombre)" para que el objeto anidado se llame "curso"
   const { data } = await supabase
     .from('asignaturas')
     .select('id,nombre, curso:cursos(nombre)')
@@ -28,14 +28,27 @@ export default async function ProfesorHome() {
   const asignaciones = (data ?? []) as Asignacion[]
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-semibold mb-4">Mis asignaturas</h1>
+    <div className="p-6 space-y-4">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Panel del Profesor</h1>
+        <Link
+          href="/profesor/asistencia"
+          className="rounded bg-blue-600 px-3 py-1.5 text-white"
+        >
+          Ir a Asistencia
+        </Link>
+      </div>
+
+      <h2 className="text-lg font-semibold">Mis asignaturas</h2>
       <ul className="space-y-2">
         {asignaciones.map((a) => (
           <li key={a.id} className="p-3 rounded border">
             <b>{a.nombre}</b> — {a.curso?.nombre ?? 'Sin curso'}
           </li>
         ))}
+        {!asignaciones.length && (
+          <li className="text-sm opacity-75">Aún no tienes asignaturas asignadas.</li>
+        )}
       </ul>
     </div>
   )
